@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
@@ -14,12 +14,31 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@spacex-car-house.t231t.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-client.connect(err => {
-    const collection = client.db("test").collection("devices");
-    console.log('He he connected bro connected');
-    // perform actions on the collection object
-    client.close();
-});
+async function run() {
+    try {
+        await client.connect();
+        const inventoryCollection = client.db('SpaceX-Car-House').collection('Inventories');
+        app.get('/inventory', async (req, res) => {
+            const query = {};
+            const cursor = inventoryCollection.find(query);
+            const inventories = await cursor.toArray();
+            res.send(inventories);
+        });
+
+        app.get('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const inventory = await inventoryCollection.findOne(query);
+            res.send(inventory);
+        })
+
+    }
+    finally {
+
+    }
+}
+
+run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
