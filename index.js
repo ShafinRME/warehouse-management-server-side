@@ -54,8 +54,6 @@ async function run() {
             res.send(inventroies);
         })
 
-
-
         // Delete a inventory
         app.delete('/inventory/:id', async (req, res) => {
             const id = req.params.id;
