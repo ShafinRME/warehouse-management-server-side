@@ -5,8 +5,6 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Pass: eQU8kt5khRTkKwgQ
-// User: SpaceX-Car-House
 // Declaring and Using of MiddleWare
 app.use(cors());
 app.use(express.json());
@@ -18,11 +16,20 @@ async function run() {
     try {
         await client.connect();
         const inventoryCollection = client.db('SpaceX-Car-House').collection('Inventories');
+        const commentCollection = client.db('SpaceX-Car-House').collection('comments');
         app.get('/inventory', async (req, res) => {
             const query = {};
             const cursor = inventoryCollection.find(query);
             const inventories = await cursor.toArray();
             res.send(inventories);
+        });
+
+        // Get comments data
+        app.get('/comment', async (req, res) => {
+            const query = {};
+            const cursor = commentCollection.find(query);
+            const comments = await cursor.toArray();
+            res.send(comments);
         });
 
         app.get('/inventory/:id', async (req, res) => {
@@ -35,6 +42,25 @@ async function run() {
         app.post('/inventory', async (req, res) => {
             const newInventory = req.body;
             const result = await inventoryCollection.insertOne(newInventory);
+            res.send(result);
+        });
+
+        // Added Myitem
+        app.get('/inventory', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = inventoryCollection.find(query);
+            const inventroies = await cursor.toArray();
+            res.send(inventroies);
+        })
+
+
+
+        // Delete a inventory
+        app.delete('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await inventoryCollection.deleteOne(query);
             res.send(result);
         })
 
